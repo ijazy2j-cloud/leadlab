@@ -1,0 +1,14 @@
+node_modules
+**/dev.db
+**/dev.db-journal
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+backend/prisma/prisma/dev.db
+backend/prisma/prisma/dev.db-journal
+backend/.env
+frontend/dist
+.DS_Store
+.env
+.env.local
+backend/public
+local-modules/config.mjs

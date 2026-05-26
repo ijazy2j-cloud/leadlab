@@ -1,0 +1,36 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "LeadLab backend API",
+  "type": "module",
+  "main": "src/server.mjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "nodemon src/server.mjs",
+    "start": "node src/server.mjs",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate-sqlite": "prisma migrate dev --schema ./prisma/schema-sqlite.prisma",
+    "db:seed": "node src/seed/run.js",
+    "db:reset": "prisma migrate reset --force",
+    "db:use-sqlite": "node scripts/use-sqlite.mjs",
+    "db:use-postgresql": "node scripts/use-postgresql.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.3",
+    "prisma": "^6.19.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

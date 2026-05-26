@@ -1,0 +1,4 @@
+# TODO: Confirm with IT what node options DHP expects
+# Based on dhp-node-example commit message ("Add node_options to prove that our pydeploy change is going to work"),
+# this file likely sets memory limits and ES module flags
+--max-old-space-size=2048
