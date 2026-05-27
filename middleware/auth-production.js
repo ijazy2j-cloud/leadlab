@@ -1,7 +1,7 @@
 // TODO: This middleware requires ./local-modules/config.mjs to export efxEnv and envSettings.
 // TODO: This middleware requires @hsbc/hsbc-cert (HSBC internal package, available on DHP).
 // TODO: When config.mjs template is received, replace the loginEnv hardcoded value with the import.
-// TODO: Switch backend/src/server.mjs to import this middleware instead of auth.js when deploying to DHP.
+// TODO: Switch server.mjs to import this middleware instead of auth.js when deploying to DHP.
 
 // Development note: auth.js (mock, header-based) is used in local dev.
 // This file (JWT cookie-based) is used on DHP. Both coexist — do not delete auth.js.
@@ -11,7 +11,7 @@ import axios from 'axios';
 import cookieParser from 'cookie-parser';
 
 // Hardcoded to UAT until config.mjs template is received from IT.
-// TODO: replace with: import { efxEnv } from '../../local-modules/config.mjs';
+// TODO: replace with: import { efxEnv } from '../local-modules/config.mjs';
 const loginEnv = 'uat';
 
 let cachedPublicKey = null;

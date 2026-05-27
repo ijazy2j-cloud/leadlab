@@ -1,4 +1,4 @@
-import { prisma } from '../lib/prisma.js';
+import { getPool } from '../local-modules/db.mjs';
 
 const principlesData = [
   {
@@ -105,17 +105,27 @@ const principlesData = [
 ];
 
 async function seedPrinciples() {
-  const principles = [];
-  for (const data of principlesData) {
-    const principle = await prisma.principle.upsert({
-      where: { number: data.number },
-      update: data,
-      create: data,
-    });
-    principles.push(principle);
-    console.log(`  Seeded principle ${principle.number}: ${principle.name}`);
+  const pool = getPool();
+  const results = [];
+  for (const d of principlesData) {
+    const { rows } = await pool.query(
+      `INSERT INTO ll_principles
+         (number, name, short_description, intent, objectives, behaviours)
+       VALUES ($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (number) DO UPDATE SET
+         name=EXCLUDED.name,
+         short_description=EXCLUDED.short_description,
+         intent=EXCLUDED.intent,
+         objectives=EXCLUDED.objectives,
+         behaviours=EXCLUDED.behaviours,
+         updated_at=now()
+       RETURNING *`,
+      [d.number, d.name, d.shortDescription, d.intent, d.objectives, d.behaviours]
+    );
+    results.push(rows[0]);
+    console.log(`  Seeded principle ${rows[0].number}: ${rows[0].name}`);
   }
-  return principles;
+  return results;
 }
 
 export { seedPrinciples };

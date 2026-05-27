@@ -1,8 +1,7 @@
-import { prisma } from '../lib/prisma.js';
+import { getPool } from '../local-modules/db.mjs';
 
 function getActivitiesData(principles) {
   const byNumber = Object.fromEntries(principles.map((p) => [p.number, p.id]));
-
   return [
     {
       principleId: byNumber[1],
@@ -79,12 +78,16 @@ function getActivitiesData(principles) {
 }
 
 async function seedActivities(principles) {
-  // Delete existing activities so re-running the seed is safe
-  await prisma.activity.deleteMany({});
+  const pool = getPool();
+  await pool.query('DELETE FROM ll_activities');
   const activitiesData = getActivitiesData(principles);
-  for (const data of activitiesData) {
-    await prisma.activity.create({ data });
-    console.log(`  Seeded activity: ${data.name}`);
+  for (const d of activitiesData) {
+    await pool.query(
+      `INSERT INTO ll_activities (principle_id, name, duration, type, steps)
+       VALUES ($1,$2,$3,$4,$5)`,
+      [d.principleId, d.name, d.duration, d.type, d.steps]
+    );
+    console.log(`  Seeded activity: ${d.name}`);
   }
 }
 

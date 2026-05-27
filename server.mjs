@@ -1,9 +1,13 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import os from 'os';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
-dotenv.config();
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { setup } from './local-modules/db.mjs';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Route imports
 import usersRouter from './routes/users.js';
@@ -22,8 +26,7 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 
-// --- Phase I.2: DHP health endpoint ---
-// Must be at /health (not /api/health) as required by DHP platform.
+// DHP health endpoint — must be at /health (not /api/health).
 app.get('/health', (req, res) => {
   res.json({
     isAvailable: true,
@@ -39,22 +42,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Internal health check (kept for backwards compatibility)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-// Production static file serving — only active when NODE_ENV=production.
-// In development, the Vite dev server (port 5173) serves the frontend directly.
-if (process.env.NODE_ENV === 'production') {
-  const { fileURLToPath } = await import('url');
-  const { dirname, join } = await import('path');
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  app.use(express.static(join(__dirname, '..', 'public')));
-  app.get('*', (req, res) => {
-    res.sendFile(join(__dirname, '..', 'public', 'index.html'));
-  });
-}
 
 // API routes
 app.use('/api/users', usersRouter);
@@ -66,6 +56,15 @@ app.use('/api/big-five', bigFiveRouter);
 app.use('/api/follow-ups', followUpsRouter);
 app.use('/api/dashboard', dashboardRouter);
 
+// Serve Vite build from /static (always, not just in production)
+app.use(express.static(join(__dirname, 'static')));
+
+// SPA catch-all: return index.html for any non-API, non-asset request
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(join(__dirname, 'static', 'index.html'));
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -75,17 +74,31 @@ app.use((err, req, res, next) => {
   });
 });
 
-// --- Phase I.3: Post-verification self-test (pvt pattern) ---
-app.listen(PORT, async () => {
+// ── Startup ─────────────────────────────────────────────────────────────────
+async function start() {
   try {
-    const res = await fetch(`http://localhost:${PORT}/health`);
-    if (res.status !== 200) {
-      console.error('FAILED PVT');
-      process.exit(1);
-    }
-    console.log(`SUCCESS, running on port ${PORT}`);
+    await setup();
+    console.log('Database ready.');
   } catch (err) {
-    console.error('FAILED PVT', err.message);
+    console.error('Database setup failed:', err.message);
     process.exit(1);
   }
-});
+
+  app.listen(PORT, async () => {
+    console.log(`Server listening on port ${PORT}.`);
+    // Post-verification self-test (pvt pattern required by DHP)
+    try {
+      const res = await fetch(`http://localhost:${PORT}/health`);
+      if (res.status !== 200) {
+        console.error('FAILED PVT');
+        process.exit(1);
+      }
+      console.log('SUCCESS PVT — /health ok.');
+    } catch (err) {
+      console.error('FAILED PVT', err.message);
+      process.exit(1);
+    }
+  });
+}
+
+start();

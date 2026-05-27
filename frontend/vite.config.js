@@ -6,13 +6,13 @@ export default defineConfig({
   build: {
     // Output into Express's public folder so the backend can serve it in production.
     // In development, Vite serves on port 5173 and this path is never written to.
-    outDir: '../backend/public',
+    outDir: '../static',
     emptyOutDir: true,
   },
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',
+        target: 'http://127.0.0.1:3001',
         changeOrigin: true,
       },
     },
