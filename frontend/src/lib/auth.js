@@ -1,15 +1,5 @@
-export function getCurrentUserId() {
-  return localStorage.getItem('userId');
-}
+// Auth is handled by SSO in production. In local dev, the backend mock middleware
+// defaults to the first seeded user. No client-side user state is stored.
 
-export function setCurrentUserId(id) {
-  localStorage.setItem('userId', id);
-}
-
-export function clearCurrentUser() {
-  localStorage.removeItem('userId');
-}
-
-export function isLoggedIn() {
-  return Boolean(getCurrentUserId());
-}
+// TODO: IT to provide the SSO logout URL.
+export const LOGOUT_URL = '/logout';

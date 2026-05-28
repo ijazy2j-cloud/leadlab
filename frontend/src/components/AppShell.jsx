@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { NavLink, useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import Hexagon from './Hexagon';
-import { clearCurrentUser } from '../lib/auth';
+import { LOGOUT_URL } from '../lib/auth';
 import { useCurrentUser } from '../lib/queries';
 
 function initials(name = '') {
@@ -27,7 +27,6 @@ const navLinkClass = ({ isActive }) =>
   }`;
 
 export default function AppShell({ onOpenGlossary }) {
-  const navigate = useNavigate();
   const location = useLocation();
   const { data: user } = useCurrentUser();
 
@@ -66,13 +65,7 @@ export default function AppShell({ onOpenGlossary }) {
   }, [mobileNavOpen]);
 
   function handleSignOut() {
-    clearCurrentUser();
-    navigate('/login');
-  }
-
-  function handleSwitchUser() {
-    clearCurrentUser();
-    navigate('/login');
+    window.location.href = LOGOUT_URL;
   }
 
   return (
@@ -149,13 +142,6 @@ export default function AppShell({ onOpenGlossary }) {
                       <div className="text-xs text-hsbc-grey mt-1">{user.role} · {user.team}</div>
                     </div>
 
-                    <button
-                      role="menuitem"
-                      onClick={() => { setMenuOpen(false); handleSwitchUser(); }}
-                      className="w-full text-left px-3 py-2 text-sm text-hsbc-grey hover:text-hsbc-black hover:bg-hsbc-bg transition-colors"
-                    >
-                      Switch user
-                    </button>
                     <button
                       role="menuitem"
                       onClick={() => { setMenuOpen(false); handleSignOut(); }}
@@ -240,12 +226,6 @@ export default function AppShell({ onOpenGlossary }) {
                     <div className="text-xs text-hsbc-grey mt-0.5">{user.role}</div>
                   </div>
                 </div>
-                <button
-                  onClick={() => { setMobileNavOpen(false); handleSwitchUser(); }}
-                  className="w-full text-left text-sm text-hsbc-grey hover:text-hsbc-black py-1.5 transition-colors"
-                >
-                  Switch user
-                </button>
                 <button
                   onClick={() => { setMobileNavOpen(false); handleSignOut(); }}
                   className="w-full text-left text-sm text-hsbc-grey hover:text-hsbc-black py-1.5 transition-colors"

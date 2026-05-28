@@ -1,16 +1,19 @@
 import axios from 'axios';
-import { getCurrentUserId } from './auth';
+import { LOGOUT_URL } from './auth';
 
 const api = axios.create({
   baseURL: '/api',
 });
 
-api.interceptors.request.use((config) => {
-  const userId = getCurrentUserId();
-  if (userId) {
-    config.headers['x-user-id'] = userId;
+// On SSO session expiry the backend returns 401. Redirect to the SSO logout page.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      window.location.href = LOGOUT_URL;
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 export default api;

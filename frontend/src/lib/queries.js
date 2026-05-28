@@ -1,22 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from './api';
-import { getCurrentUserId } from './auth';
 
-// Users — no auth required (powers the login picker)
-export function useUsers() {
-  return useQuery({
-    queryKey: ['users'],
-    queryFn: () => api.get('/users').then((r) => r.data),
-  });
-}
-
-// Include userId in key so switching user invalidates the cached result
 export function useCurrentUser() {
-  const userId = getCurrentUserId();
   return useQuery({
-    queryKey: ['me', userId],
+    queryKey: ['me'],
     queryFn: () => api.get('/users/me').then((r) => r.data),
-    enabled: Boolean(userId),
+    retry: false,
   });
 }
 

@@ -18,25 +18,8 @@ npm run install:all
 ### Set up the database
 
 ```bash
-npm run db:setup
-```
-
-This runs the Prisma migration and seeds the database with the six leadership principles, activities, and four demo users.
-
-### Switch database for local dev (SQLite)
-
-The schema uses PostgreSQL for DHP deployment. For local development without PostgreSQL installed, switch to SQLite first:
-
-```bash
-npm --prefix backend run db:use-sqlite
-```
-
-This regenerates the Prisma client for SQLite and updates `DATABASE_URL` in `backend/.env`. You only need to run this once (or again after `db:use-postgresql`).
-
-To switch back to PostgreSQL (e.g. before deploying or testing against a local PG instance):
-
-```bash
-npm --prefix backend run db:use-postgresql
+npm run db:schema   # Creates tables
+npm run db:seed     # Seeds principles, activities, and demo users
 ```
 
 ### Run the dev server
@@ -47,75 +30,74 @@ npm run dev
 
 This starts both the backend (port 4000) and frontend (port 5173) concurrently. Open http://localhost:5173 in your browser.
 
+The app loads directly to the dashboard — no login screen. In local dev, the backend mock middleware defaults to **Ravindu Silva** (the first seeded user) if no `x-user-id` header is present.
+
+## Testing as a different user (local dev only)
+
+To see the app as a different demo user, set the `x-user-id` header on your requests. The easiest way is to install a browser extension like ModHeader and add:
+
+```
+x-user-id: 2   # Priya Wickramasinghe
+x-user-id: 3   # Tom Harper
+x-user-id: 4   # Aisha Khan
+```
+
+Remove the header (or set it back to `1`) to return to Ravindu Silva.
+
 ## Production-like run (local)
 
 To test the full production bundle locally:
 
 ```bash
-npm run build          # Builds React into backend/public
-npm --prefix backend run start   # Starts Express serving the static files on port 4000
+npm run build      # Builds React into /static
+npm start          # Starts Express serving the static files on port 4000
 ```
 
 Open http://localhost:4000 in your browser.
 
-## Resetting the database
+## Authentication
 
-```bash
-npm --prefix backend run db:reset
-npm --prefix backend run db:seed
-```
+**Production:** Auth is handled by HSBC SSO at the network layer. The backend validates the SSO session via `middleware/auth-production.js`. No login screen is presented to the user — SSO handles identity before the request reaches LeadLab.
+
+**Local dev:** The mock middleware (`middleware/auth.js`) reads an optional `x-user-id` header and falls back to Ravindu Silva if no header is present.
+
+**Sign out:** Routes to the SSO logout URL. The URL is currently a placeholder (`/logout`) — IT to provide the production value.
 
 ## Project structure
 
 ```
 leadlab/
-  backend/              Express API (ES modules), Prisma, PostgreSQL
-  frontend/             React app with Vite and Tailwind
-  local-modules/        Skeleton for HSBC IT config module (see TODOs below)
-  dhp-config.json       DHP deployment config skeleton (see TODOs below)
-  build.sh              DHP build script skeleton (see TODOs below)
-  node_options          Node runtime options for DHP
+  routes/           Thin route files (URL definitions + middleware mounting)
+  controllers/      One per resource — request/response, validation, permissions
+  services/         One per resource — pure DB operations, no HTTP knowledge
+  middleware/       auth, validate, error handlers
+  frontend/         React app with Vite and Tailwind
+  local-modules/    HSBC IT config module (see TODOs below)
+  dhp-config.json   DHP deployment config (see TODOs below)
+  build.sh          DHP build script (see TODOs below)
+  node_options      Node runtime options for DHP
 ```
-
-## Run modes
-
-| Mode | Command | Frontend served by | Database |
-|------|---------|-------------------|----------|
-| Dev | `npm run dev` | Vite on port 5173 | Local (see .env) |
-| Production-like | `npm run build && npm --prefix backend run start` | Express on port 4000 | Injected by DHP |
-
-## DHP deployment
-
-Push to the internal Bitbucket repository. DHP builds via `restabuild` using `build.sh`.
-
-The backend listens on port 8080 in production (set `PORT=8080` or let DHP inject it). After startup, the server self-tests `/health` and exits with code 1 if it does not return 200.
-
-Auth in production uses the `dps-jwt-token` cookie verified against the DPS login public key. The mock auth middleware (`auth.js`) is used in development only; it reads `x-user-id` from headers.
 
 ## Demo users
 
-| Name | Role | Team |
-|------|------|------|
-| Ravindu Silva | Operations Lead | Colombo |
-| Priya Wickramasinghe | Customer Service Manager | Colombo |
-| Tom Harper | Regional Director | London |
-| Aisha Khan | Product Lead | Singapore |
+| ID | Name | Role | Team |
+|----|------|------|------|
+| 1 | Ravindu Silva | Operations Lead | Colombo |
+| 2 | Priya Wickramasinghe | Customer Service Manager | Colombo |
+| 3 | Tom Harper | Regional Director | London |
+| 4 | Aisha Khan | Product Lead | Singapore |
 
 ---
 
 ## DHP TODO list — must be resolved before first deployment
 
-The following items require input from HSBC IT before LeadLab can be deployed to DHP.
-
 | # | File | TODO |
 |---|------|------|
-| 1 | `local-modules/config.mjs` | Replace skeleton with official IT template. Expected exports: `efxEnv`, `envSettings` (database config for pgmaker). |
-| 2 | `backend/src/middleware/auth-production.js` | Import `efxEnv` from `local-modules/config.mjs` once template is received (currently hardcoded to `"uat"`). |
-| 3 | `backend/src/middleware/auth-production.js` | Install `@hsbc/hsbc-cert` (HSBC internal npm package) when available on DHP. |
-| 4 | `backend/src/server.mjs` | Switch `import { auth }` from `auth.js` to `auth-production.js` when deploying to DHP. |
-| 5 | `dhp-config.json` | Replace skeleton with actual DHP cluster/region config once template is received from IT. |
-| 6 | `build.sh` | Replace skeleton with actual DHP build script once template is received from IT. Confirm whether additional steps (asset copying, env file generation) are needed. |
-| 7 | `node_options` | Confirm with IT what flags DHP expects (current skeleton sets `--max-old-space-size=2048`). |
-| 8 | `backend/src/server.mjs` (`stash-url`) | Replace `"TODO: replace with internal Bitbucket URL once repo is created"` in the `/health` response with the actual Bitbucket URL. |
-| 9 | `backend/.env` | `DATABASE_URL` is a placeholder. On DHP this is injected via `local-modules/config.mjs`. Confirm pgmaker connection string format with IT. |
-| 10 | `package.json` (root) | DHP may require specific script names. Confirm `"build"` is the correct entry point with IT. |
+| 1 | `local-modules/config.mjs` | Replace skeleton with official IT template. Expected exports: `efxEnv`, `envSettings`. |
+| 2 | `middleware/auth-production.js` | Import `efxEnv` from `local-modules/config.mjs` once template is received. |
+| 3 | `middleware/auth-production.js` | Install `@hsbc/hsbc-cert` when available on DHP. |
+| 4 | `server.mjs` | Switch `import { auth }` from `auth.js` to `auth-production.js` when deploying to DHP. |
+| 5 | `frontend/src/lib/auth.js` (`LOGOUT_URL`) | Replace `/logout` placeholder with the SSO logout URL provided by IT. |
+| 6 | `dhp-config.json` | Replace skeleton with actual DHP cluster/region config from IT. |
+| 7 | `build.sh` | Replace skeleton with actual DHP build script from IT. |
+| 8 | `server.mjs` (`stash-url`) | Replace `"TODO"` in `/health` response with the actual Bitbucket URL. |
