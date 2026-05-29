@@ -209,6 +209,13 @@ export default function DashboardPage() {
         })()}
       </section>
 
+      {/* ── Prompts hint ─────────────────────────────────────────── */}
+      <p className="text-xs text-hsbc-grey -mt-6">
+        <Link to="/prompts" className="underline underline-offset-2 hover:text-hsbc-black transition-colors">
+          Try a prompt for this week's focus
+        </Link>
+      </p>
+
       {/* ── Due in the next 48 hours ─────────────────────────────── */}
       <section aria-label="Upcoming follow ups">
         <div className="flex items-baseline justify-between mb-3">

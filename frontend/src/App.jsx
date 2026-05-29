@@ -14,6 +14,7 @@ import MedicalModelFormPage from './pages/MedicalModelFormPage';
 import BigFiveFormPage from './pages/BigFiveFormPage';
 import FollowUpsPage from './pages/FollowUpsPage';
 import MyPracticePage from './pages/MyPracticePage';
+import PromptsPage from './pages/PromptsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -56,6 +57,7 @@ function AppLoader() {
         <Route path="practice/big-five/:id" element={<BigFiveFormPage />} />
         <Route path="follow-ups" element={<FollowUpsPage />} />
         <Route path="my-practice" element={<MyPracticePage />} />
+        <Route path="prompts" element={<PromptsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

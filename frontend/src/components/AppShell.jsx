@@ -16,6 +16,7 @@ function initials(name = '') {
 const NAV_LINKS = [
   { to: '/my-practice', label: 'My practice' },
   { to: '/principles',  label: 'Library'      },
+  { to: '/prompts',     label: 'Prompts'      },
   { to: '/follow-ups',  label: 'Follow ups'   },
 ];
 

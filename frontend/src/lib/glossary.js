@@ -7,6 +7,7 @@ const glossary = {
   'NEAT': 'A talent assessment model: Notable strengths, Emerging potential, Areas to develop, Threats to performance.',
   'Big Five': 'A weekly prioritisation practice. Identify the five actions that will make the biggest difference this week. Assign an owner and a deadline to each.',
   'BLUF': 'Bottom Line Up Front. Lead communication with the conclusion or recommendation before the supporting detail.',
+  'Steel man': 'The practice of constructing the strongest possible version of an opposing argument before challenging it. The opposite of a straw man. Used to test your own reasoning and catch blind spots.',
   'Minto Pyramid Principle': 'A structured communication approach: start with the conclusion, then group supporting arguments, then layer in detail beneath each argument.',
   'Hook Line and Sinker': 'A storytelling structure for persuasive communication: Hook (open with something that creates curiosity), Line (the core message), Sinker (the call to action or outcome).',
   'Jenga Technique': 'A process simplification method. Remove one step at a time from a process and ask: does it still stand? If yes, the step was unnecessary.',
